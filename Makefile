@@ -10,63 +10,71 @@
 RANLIB = ranlib
 AR = ar
 
-
-VERSION = 1.0
-DIRNAME= rscode-$(VERSION)
-
+VERSION = 1.0.2
+DIRNAME= rs-coder-$(VERSION)
 
 CC = gcc
-# OPTIMIZE_FLAGS = -O69
 DEBUG_FLAGS = -g
-CFLAGS = -Wall -Wstrict-prototypes  $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS) -I..
-LDFLAGS = $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS)
+CFLAGS = -Wall -Wstrict-prototypes  $(OPTIMIZE_FLAGS)
+LDFLAGS = $(OPTIMIZE_FLAGS)
 
 .PHONY: clean
 
 CXX = g++
-CXXFLAGS = -Wall -g -Wextra
+CXXFLAGS = -Wall -Wextra
 
 SRCS = common.cpp
 HDRS = common.h
 AUX  = Makefile
+DOCS = LICENSE README.md
 
 LIB_CSRC = rs.c galois.c berlekamp.c crcgen.c
 LIB_HSRC = ecc.h
 LIB_OBJS = rs.o galois.o berlekamp.o crcgen.o
 
 TARGET_LIB = libecc.a
-TEST_PROGS = example
+TARGET_LIBSO = libecc.so.1
 
-TARGETS = $(TARGET_LIB) bms1A bms1B
+TARGETS = $(TARGET_LIB) rsenc rsdec
+TARGETS_SHARED = $(TARGET_LIBSO) rsenc-shared rsdec-shared
 
-PACKNAME=project.zip
+PACKNAME=$(DIRNAME).zip
 
-all: $(TARGETS) bms1A bms1B
+all: $(TARGETS)
 
 $(TARGET_LIB): $(LIB_OBJS)
 	$(RM) $@
-	$(AR) cq $@ $(LIB_OBJS)
+	$(AR) cq $@ $^
 	if [ "$(RANLIB)" ]; then $(RANLIB) $@; fi
 
+rsenc: common.cpp $(TARGET_LIB)
+	$(CXX) $(CXXFLAGS) -DBMS1A $(LDFLAGS) $^ -o $@
+
+rsdec: common.cpp $(TARGET_LIB)
+	$(CXX) $(CXXFLAGS) -DBMS1B $(LDFLAGS) $^ -o $@
+
+shared: $(TARGETS_SHARED)
+
+$(TARGET_LIBSO): $(LIB_OBJS)
+	$(CXX) -shared -Wl,-soname,$@ $(CXXFLAGS) $(LDFLAGS) $^ -o $@
+
+rsenc-shared: common.cpp $(TARGET_LIBSO)
+	$(CXX) $(CXXFLAGS) -DBMS1A $(LDFLAGS) $^ -o $@
+
+rsdec-shared: common.cpp $(TARGET_LIBSO)
+	$(CXX) $(CXXFLAGS) -DBMS1B $(LDFLAGS) $^ -o $@
+
 clean:
-	rm -f *.o example libecc.a
-	rm -f *~
-	rm -f bms1A bms1B *.o ${PACKNAME}
+	rm -f *.o $(TARGETS) $(TARGETS_SHARED) ${PACKNAME}
 
 dist:
-	(cd ..; tar -cvf rscode-$(VERSION).tar $(DIRNAME))
+	(cd ..; tar -cvf $(DIRNAME).tar $(DIRNAME))
 
 depend:
 	makedepend $(SRCS)
 
 pack:
-	zip -R $(PACKNAME) $(SRCS) $(HDRS) $(AUX) $(LIB_CSRC) $(LIB_HSRC)
-
-bms1A: common.cpp $(LIB_OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) ${LIB_OBJS} -DBMS1A common.cpp -o $@
-
-bms1B: common.cpp $(LIB_OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) ${LIB_OBJS} -DBMS1B common.cpp -o $@
+	zip -R ../$(PACKNAME) $(SRCS) $(HDRS) $(AUX) $(LIB_CSRC) $(LIB_HSRC) $(DOCS)
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

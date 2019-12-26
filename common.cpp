@@ -22,7 +22,7 @@
   #define DO_STUFF recover_file
 #else
 #ifdef BMS1A
-  #define STR_SUFFIX ".out"
+  #define STR_SUFFIX ".rsecc"
   #define PROG_DESC  "Secure given file for bit errors.\n"
   #define DO_STUFF secure_file
 #else
