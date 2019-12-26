@@ -11,7 +11,7 @@
 #include <ctime>
 #include <cstdlib>
 
-#include "common.h"
+#include "coder.h"
 
 #define AUTHOR "Fridolin Pokorny <fridex.devel@gmail.com>"
 

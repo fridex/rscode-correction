@@ -10,7 +10,7 @@
 #include <vector>
 
 extern "C" {
-    #include "ecc.h"
+    #include "lib/ecc.h"
 }
 
 enum ret_t {

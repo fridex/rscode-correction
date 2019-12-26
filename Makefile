@@ -10,7 +10,7 @@
 RANLIB = ranlib
 AR = ar
 
-VERSION = 1.0.2
+VERSION = 1.0.3
 DIRNAME= rs-coder-$(VERSION)
 
 CC = gcc
@@ -23,14 +23,16 @@ LDFLAGS = $(OPTIMIZE_FLAGS)
 CXX = g++
 CXXFLAGS = -Wall -Wextra
 
-SRCS = common.cpp
-HDRS = common.h
+SRCP = src
+SRCL = $(SRCP)/lib
+SRCS = $(SRCP)/coder.cpp
+HDRS = $(SRCP)/coder.h
 AUX  = Makefile
 DOCS = LICENSE README.md
 
-LIB_CSRC = rs.c galois.c berlekamp.c crcgen.c
-LIB_HSRC = ecc.h
-LIB_OBJS = rs.o galois.o berlekamp.o crcgen.o
+LIB_CSRC = $(SRCL)/rs.c $(SRCL)/galois.c $(SRCL)/berlekamp.c $(SRCL)/crcgen.c
+LIB_HSRC = $(SRCL)/ecc.h
+LIB_OBJS = $(SRCL)/rs.o $(SRCL)/galois.o $(SRCL)/berlekamp.o $(SRCL)/crcgen.o
 
 TARGET_LIB = libecc.a
 TARGET_LIBSO = libecc.so.1
@@ -47,10 +49,10 @@ $(TARGET_LIB): $(LIB_OBJS)
 	$(AR) cq $@ $^
 	if [ "$(RANLIB)" ]; then $(RANLIB) $@; fi
 
-rsenc: common.cpp $(TARGET_LIB)
+rsenc: $(SRCS) $(TARGET_LIB)
 	$(CXX) $(CXXFLAGS) -DBMS1A $(LDFLAGS) $^ -o $@
 
-rsdec: common.cpp $(TARGET_LIB)
+rsdec: $(SRCS) $(TARGET_LIB)
 	$(CXX) $(CXXFLAGS) -DBMS1B $(LDFLAGS) $^ -o $@
 
 shared: $(TARGETS_SHARED)
@@ -58,14 +60,14 @@ shared: $(TARGETS_SHARED)
 $(TARGET_LIBSO): $(LIB_OBJS)
 	$(CC) -shared -Wl,-soname,$@ $(CFLAGS) $(LDFLAGS) $^ -o $@
 
-rsenc-shared: common.cpp $(TARGET_LIBSO)
+rsenc-shared: $(SRCS) $(TARGET_LIBSO)
 	$(CXX) $(CXXFLAGS) -DBMS1A $(LDFLAGS) $^ -o $@
 
-rsdec-shared: common.cpp $(TARGET_LIBSO)
+rsdec-shared: $(SRCS) $(TARGET_LIBSO)
 	$(CXX) $(CXXFLAGS) -DBMS1B $(LDFLAGS) $^ -o $@
 
 clean:
-	rm -f *.o $(TARGETS) $(TARGETS_SHARED) ${PACKNAME}
+	rm -f $(SRCL)/*.o $(TARGETS) $(TARGETS_SHARED) ${PACKNAME}
 
 dist:
 	(cd ..; tar -cvf $(DIRNAME).tar $(DIRNAME))
