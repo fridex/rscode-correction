@@ -56,7 +56,7 @@ rsdec: common.cpp $(TARGET_LIB)
 shared: $(TARGETS_SHARED)
 
 $(TARGET_LIBSO): $(LIB_OBJS)
-	$(CXX) -shared -Wl,-soname,$@ $(CXXFLAGS) $(LDFLAGS) $^ -o $@
+	$(CC) -shared -Wl,-soname,$@ $(CFLAGS) $(LDFLAGS) $^ -o $@
 
 rsenc-shared: common.cpp $(TARGET_LIBSO)
 	$(CXX) $(CXXFLAGS) -DBMS1A $(LDFLAGS) $^ -o $@
