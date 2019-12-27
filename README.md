@@ -20,7 +20,18 @@ For shared:
 make shared
 ```
 
-## Use
+## Usage
+
+For static:
+```sh
+./rs{enc,dec} you.file [blocksize=100]
+```
+For shared:
+```sh
+LD_LIBRARY_PATH=. ./rs{enc,dec}-shared you.file [blocksize=100]
+```
+
+## Examples
 
 For static:
 ```sh
