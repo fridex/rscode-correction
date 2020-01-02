@@ -15,8 +15,7 @@ ret_t recover_file(std::ofstream & file_out, std::vector<char> & data, size_t bl
 /*******************************************************************************/
 
 /* Introduce a byte error at LOC */
-void
-byte_err(int err, int loc, char *dst) {
+void byte_err(int err, int loc, char *dst) {
     //printf("Adding Error at loc %d, data %#x\n", loc, dst[loc-1]);
     dst[loc - 1] ^= err;
 }
@@ -237,16 +236,6 @@ int main(int argc, char * argv[]) {
         return print_help(argv[0], blocksize);
 
     fname = argv[1];
-    if (argc == 3)
-        blocksize = atoi(argv[2]);
-    if (blocksize < NPAR || blocksize > UPPER_BLOCK_LEN) {
-        std::cerr << "Invalid block size provided: "
-                  << blocksize << "\n"
-                  << "Valid range: " << NPAR << " - "
-                  << UPPER_BLOCK_LEN << "\n" << std::endl;
-        return RET_ERR_ARGS;
-    }
-    
     // input file
     file_in.open(fname.c_str(), std::ios::in | std::ios::binary);
     if (! file_in.is_open()) {
@@ -255,6 +244,39 @@ int main(int argc, char * argv[]) {
         return RET_ERR_FILE_IN;
     }
 
+#ifdef BMS1B
+    char mc[10] = {"\0"};
+    file_in.read(mc, 9);
+    if (sscanf(mc, "RSECC%d", &blocksize) <= 0)
+    {
+        blocksize = 0;
+        std::cerr << "WARNING!\nBad MAGIC word: " << mc
+                  << "\nSpecify the block size\n" << std::endl;
+    }
+    if (argc == 3)
+    {
+        int blocksizearg = atoi(argv[2]);
+        if (blocksize > 0 && blocksize != blocksizearg)
+        {
+			std::cerr << "WARNING!\nThe block size parsed of the magic "
+			          << blocksize << " does not correspond to the one "
+			          << "supplied explicitly " << blocksizearg
+			          << "\nUsed the explicit block size " << blocksizearg
+			          << "\n" << std::endl;
+		}
+	}
+#endif // BMS1B
+    if (argc == 3)
+        blocksize = atoi(argv[2]);
+        
+    if (blocksize < NPAR || blocksize > UPPER_BLOCK_LEN) {
+        std::cerr << "ERROR!\nInvalid block size provided: "
+                  << blocksize << "\n"
+                  << "Valid range: " << NPAR << " - "
+                  << UPPER_BLOCK_LEN << "\n" << std::endl;
+        return RET_ERR_ARGS;
+    }
+    
     std::vector<char> data((std::istreambuf_iterator<char>(file_in)),
                             std::istreambuf_iterator<char>());
     file_in.close();
@@ -268,11 +290,18 @@ int main(int argc, char * argv[]) {
         return RET_ERR_FILE_OUT;
     }
 
+#ifdef BMS1A
+    char mc[5] = {"\0"};
+    file_out.write("RSECC", 5);
+    sprintf(mc, "%d", blocksize);
+    file_out.write(mc, 4);
+#endif // BMS1A
+
     // now work for us!
     std::cout << PROG_DESC << "Block size = " << blocksize
               << ", Npar = " << NPAR << " ("
               << ((NPAR * 100 + blocksize / 2)/ blocksize)
-              << "%)\n" << std::endl;
+              << "%), size = " << data.size() << "\n" << std::endl;
     ret = DO_STUFF(file_out, data, blocksize);
 
     // clear the kitchen...
@@ -280,4 +309,3 @@ int main(int argc, char * argv[]) {
 
     return ret;
 }
-

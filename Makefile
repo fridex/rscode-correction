@@ -10,7 +10,8 @@
 RANLIB = ranlib
 AR = ar
 
-VERSION = 1.0.4
+SOVERSION = 1
+VERSION = $(SOVERSION).1.0
 DIRNAME= rs-coder-$(VERSION)
 
 CC = gcc
@@ -35,7 +36,7 @@ LIB_HSRC = $(SRCL)/ecc.h
 LIB_OBJS = $(SRCL)/rs.o $(SRCL)/galois.o $(SRCL)/berlekamp.o $(SRCL)/crcgen.o
 
 TARGET_LIB = libecc.a
-TARGET_LIBSO = libecc.so.1
+TARGET_LIBSO = libecc.so.$(SOVERSION)
 
 TARGETS = $(TARGET_LIB) rsenc rsdec
 TARGETS_SHARED = $(TARGET_LIBSO) rsenc-shared rsdec-shared

@@ -1,0 +1,23 @@
+https://github.com/fridex/rscode-correction
+
+1.1.0: zvezdochiot <mykaralw@yandex.ru>
+
+    * magic word (dirty)
+    * update doc and verison
+
+1.0.4: zvezdochiot <mykaralw@yandex.ru>
+
+    * added blocksize option
+
+1.0.3: zvezdochiot <mykaralw@yandex.ru>
+
+    * separate code and doc
+    * patch for library compatibility
+
+1.0.2: zvezdochiot <mykaralw@yandex.ru>
+
+    * shared lib
+
+1.0: Fridolín Pokorný <fridex.devel@gmail.com>
+
+    * initial import
