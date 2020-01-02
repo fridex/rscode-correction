@@ -15,7 +15,8 @@ ret_t recover_file(std::ofstream & file_out, std::vector<char> & data, size_t bl
 /*******************************************************************************/
 
 /* Introduce a byte error at LOC */
-void byte_err(int err, int loc, char *dst) {
+void byte_err(int err, int loc, char *dst)
+{
     //printf("Adding Error at loc %d, data %#x\n", loc, dst[loc-1]);
     dst[loc - 1] ^= err;
 }
@@ -27,7 +28,8 @@ void byte_err(int err, int loc, char *dst) {
  * @param pname name of the executable
  * @return RET_HELP
  */
-static int print_help(const char * pname, size_t blocksize) {
+static int print_help(const char * pname, size_t blocksize)
+{
     using namespace std;
 
     cout << PROG_DESC
@@ -45,7 +47,8 @@ static int print_help(const char * pname, size_t blocksize) {
  * @param out output array
  * @param data input array
  */
-void shuffle_secure(std::vector<char> & out, std::vector<char> & data, size_t blocksize) {
+void shuffle_secure(std::vector<char> & out, std::vector<char> & data, size_t blocksize)
+{
     /*
      * interleave using matrix - number of columns == blocks
      * data are written in reverse order as follows, consider block size 5,
@@ -57,11 +60,13 @@ void shuffle_secure(std::vector<char> & out, std::vector<char> & data, size_t bl
      *    1 6 B 2 7 C 3 8 4 9 5 A
      */
     size_t i, j;
-    size_t blocksizepar = blocksize + NPAR; 
+    size_t blocksizepar = blocksize + NPAR;
     size_t k = 0;
-    for (i = 0; i < blocksizepar; ++i) {
+    for (i = 0; i < blocksizepar; ++i)
+    {
         j = 0;
-        while (i + j * blocksizepar < data.size()) {
+        while (i + j * blocksizepar < data.size())
+        {
             out[k++] = data[i + j * blocksizepar];
             j++;
         }
@@ -74,7 +79,8 @@ void shuffle_secure(std::vector<char> & out, std::vector<char> & data, size_t bl
  * @param out output array
  * @param data input array
  */
-void shuffle_recover(std::vector<char> & out, std::vector<char> & data, size_t blocksize) {
+void shuffle_recover(std::vector<char> & out, std::vector<char> & data, size_t blocksize)
+{
     /*
      * Data from shuffle_recover should be placed in correct order, consider a
      * matrix from shuffle_secure comment
@@ -85,7 +91,7 @@ void shuffle_recover(std::vector<char> & out, std::vector<char> & data, size_t b
      *   Index of "5" is data[line*block_size + column - 2]
      */
     // error marker
-    size_t blocksizepar = blocksize + NPAR; 
+    size_t blocksizepar = blocksize + NPAR;
     size_t err;
     if (data.size() % blocksizepar == 0)
         err = 0;
@@ -99,17 +105,24 @@ void shuffle_recover(std::vector<char> & out, std::vector<char> & data, size_t b
 
     size_t i, j, local_err, k = 0;
 
-    for (i = 0; i < lines; ++i) {
+    for (i = 0; i < lines; ++i)
+    {
         local_err = 1;
 
-        for (j = 0; j < blocksizepar; ++j) {
-            if (blocksizepar - j <= err) {
-                if (k < data.size()) {
+        for (j = 0; j < blocksizepar; ++j)
+        {
+            if (blocksizepar - j <= err)
+            {
+                if (k < data.size())
+                {
                     out[k++] = data[i + j * lines - local_err];
                     local_err++;
                 }
-            } else {
-                if (k < data.size()) {
+            }
+            else
+            {
+                if (k < data.size())
+                {
                     out[k++] = data[i + j * lines];
                 }
             }
@@ -124,10 +137,11 @@ void shuffle_recover(std::vector<char> & out, std::vector<char> & data, size_t b
  * @param fname input file name
  * @return RET_OK on success, otherwise error code
  */
-ret_t recover_file(std::ofstream & file_out, std::vector<char> & in, size_t blocksize) {
+ret_t recover_file(std::ofstream & file_out, std::vector<char> & in, size_t blocksize)
+{
     initialize_ecc();
 
-    size_t blocksizepar = blocksize + NPAR; 
+    size_t blocksizepar = blocksize + NPAR;
     size_t start = 0;
     size_t i, len;
 
@@ -137,13 +151,15 @@ ret_t recover_file(std::ofstream & file_out, std::vector<char> & in, size_t bloc
     shuffle_recover(data, in, blocksize);
 
     std::vector<char> out;
-    while (start < data.size()) {
+    while (start < data.size())
+    {
         if (start + blocksizepar > data.size())
             len = data.size() - start;
         else
             len = blocksizepar;
 
-        if (len <= NPAR) {
+        if (len <= NPAR)
+        {
             std::cerr << "Error: file size does not match secured file size\n";
             return RET_ERR_RECOVER;
         }
@@ -172,7 +188,8 @@ ret_t recover_file(std::ofstream & file_out, std::vector<char> & in, size_t bloc
  * @param fname input file name
  * @return RET_OK on success, otherwise error code
  */
-ret_t secure_file(std::ofstream & file_out, std::vector<char> & data, size_t blocksize) {
+ret_t secure_file(std::ofstream & file_out, std::vector<char> & data, size_t blocksize)
+{
     std::vector<char> codeword;
 
     initialize_ecc();
@@ -194,7 +211,8 @@ ret_t secure_file(std::ofstream & file_out, std::vector<char> & data, size_t blo
     size_t start_data = 0;
     size_t len = 0;
 
-    while (start_data < data.size()) {
+    while (start_data < data.size())
+    {
         if (start_data + blocksize > data.size())
             len = data.size() - start_data;
         else
@@ -225,7 +243,8 @@ ret_t secure_file(std::ofstream & file_out, std::vector<char> & data, size_t blo
  * @param argc argument count
  * @param argv argument vector
  */
-int main(int argc, char * argv[]) {
+int main(int argc, char * argv[])
+{
     std::ifstream file_in;
     std::ofstream file_out;
     std::string fname;
@@ -238,7 +257,8 @@ int main(int argc, char * argv[]) {
     fname = argv[1];
     // input file
     file_in.open(fname.c_str(), std::ios::in | std::ios::binary);
-    if (! file_in.is_open()) {
+    if (! file_in.is_open())
+    {
         std::cerr << fname.c_str() << ":"
                   << strerror(errno) << std::endl;
         return RET_ERR_FILE_IN;
@@ -258,32 +278,34 @@ int main(int argc, char * argv[]) {
         int blocksizearg = atoi(argv[2]);
         if (blocksize > 0 && blocksize != blocksizearg)
         {
-			std::cerr << "WARNING!\nThe block size parsed of the magic "
-			          << blocksize << " does not correspond to the one "
-			          << "supplied explicitly " << blocksizearg
-			          << "\nUsed the explicit block size " << blocksizearg
-			          << "\n" << std::endl;
-		}
-	}
+            std::cerr << "WARNING!\nThe block size parsed of the magic "
+                      << blocksize << " does not correspond to the one "
+                      << "supplied explicitly " << blocksizearg
+                      << "\nUsed the explicit block size " << blocksizearg
+                      << "\n" << std::endl;
+        }
+    }
 #endif // BMS1B
     if (argc == 3)
         blocksize = atoi(argv[2]);
-        
-    if (blocksize < NPAR || blocksize > UPPER_BLOCK_LEN) {
+
+    if (blocksize < NPAR || blocksize > UPPER_BLOCK_LEN)
+    {
         std::cerr << "ERROR!\nInvalid block size provided: "
                   << blocksize << "\n"
                   << "Valid range: " << NPAR << " - "
                   << UPPER_BLOCK_LEN << "\n" << std::endl;
         return RET_ERR_ARGS;
     }
-    
+
     std::vector<char> data((std::istreambuf_iterator<char>(file_in)),
-                            std::istreambuf_iterator<char>());
+                           std::istreambuf_iterator<char>());
     file_in.close();
 
     // output file
     file_out.open((fname + STR_SUFFIX).c_str(), std::ios::out | std::ios::binary);
-    if (! file_out.is_open()) {
+    if (! file_out.is_open())
+    {
         std::cerr << (fname + STR_SUFFIX).c_str() << ":"
                   << strerror(errno) << std::endl;
         file_in.close();

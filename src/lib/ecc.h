@@ -42,12 +42,12 @@
 
   ****************************************************************/
 
+#ifndef ECC_H
+#define ECC_H
+
 #define NPAR 74
 
 /****************************************************************/
-
-
-
 
 #define TRUE 1
 #define FALSE 0
@@ -84,9 +84,8 @@ extern int gexp[];
 extern int glog[];
 
 void init_galois_tables (void);
-int ginv(int elt); 
+int ginv(int elt);
 int gmult(int a, int b);
-
 
 /* Error location routines */
 int correct_errors_erasures (unsigned char codeword[], int csize,int nerasures, int erasures[]);
@@ -98,3 +97,5 @@ void mult_polys(int dst[], int p1[], int p2[]);
 
 void copy_poly(int dst[], int src[]);
 void zero_poly(int poly[]);
+
+#endif // ECC_H
